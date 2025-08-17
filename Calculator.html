@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محاسبه گر</title>
+  <style>
+    @font-face{font-family:'IRANSans';src:url('fonts/IRANSansWeb(FaNum).woff2') format('woff2'),url('fonts/IRANSansWeb(FaNum).woff') format('woff');font-weight:normal;font-style:normal}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f8f9fa;margin:0;padding:20px;color:#333;text-align:right;direction:rtl}
+    .container{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:20px}
+    .info-section{background-color:#e9f7ef;padding:20px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;position:relative}
+    h1,h2,h3{color:#2c3e50;margin:0}
+    .formula{background-color:#d4edda;padding:15px;border-radius:8px;margin-bottom:20px}
+    .formula-text{font-family:'Courier New',monospace;font-weight:bold;color:#28a745}
+    .formula-var{font-weight:bold;color:#007bff}
+    .calculator{background-color:white;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);padding:20px}
+    .input-group{margin-bottom:15px}
+    label{display:block;margin-bottom:8px;font-weight:bold}
+    input{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-size:16px;text-align:right}
+    button{background-color:#4CAF50;color:white;border:none;padding:12px 20px;border-radius:4px;cursor:pointer;font-size:20px;width:100%;transition:background-color 0.3s}
+    button:hover{background-color:#45a049}
+    .result-section{background-color:#f8f9fa;padding:15px;border-radius:8px;margin-top:20px}
+    .results{font-size:16px}
+    #focal-length{font-weight:bold;color:#28a745}
+    .diagram-section{background-color:white;padding:20px;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);margin-top:20px}
+    canvas{display:block;margin:0 auto;background-color:#f8f9fa;border:1px solid #ddd}
+    #producer{display:flex;flex-direction:column;font-family:'IRANSans',sans-serif;font-size:12px;color:#333;background-color:#e9f7ef;padding:2px 5px;z-index:1000}
+    #producer span{display:block;white-space:nowrap}
+    @media screen and (max-width:600px){
+      .info-section{flex-direction:column;align-items:center;padding:15px}
+      .info-section h1{margin-bottom:10px}
+      #producer{width:100%;max-width:200px;margin:10px auto 0;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="info-section">
+      <h1>برنامه محاسبه فاصله کانونی دیش‌های ساده</h1>
+      <div id="producer">
+        <span>تـماس با طـراح بـرنامه</span>
+        <span>Hassan.Karime@gmail.com</span>
+      </div>
+    </div>
+    <div class="formula">
+      <h3>فرمول‌ اصلی و پارامترهای کلیدی:</h3>
+      <p>فاصله کانونی : <span class="formula-text">f = D² / (16 × d)</span></p>
+      <p>که در آن :<br>
+      <span class="formula-var">D</span> = قطر دیش (سانتیمتر)<br>
+      <span class="formula-var">d</span> = عمق دیش (سانتیمتر)<br>
+      <span class="formula-var">f</span> = فاصله کانونی (سانتیمتر)</p>
+    </div>
+    <div class="calculator">
+      <div class="input-section">
+        <div class="input-group">
+          <label for="diameter">قطر دیش (D):</label>
+          <input type="number" id="diameter" placeholder="لطفا قطر دیش را بر حسب سانتیمتر وارد کنید">
+        </div>
+        <div class="input-group">
+          <label for="depth">عمق دیش (d):</label>
+          <input type="number" id="depth" placeholder="لطفا عمق دیش را بر حسب سانتیمتر وارد کنید">
+        </div>
+        <button id="calculate">محاسبه پارامترها</button>
+      </div>
+      <div class="result-section">
+        <h2>نتایج محاسبه:</h2>
+        <div class="results">
+          <p>فاصله کانونی ( f ) : <span id="focal-length">-</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="diagram-section">
+      <h2>نمودار دیش</h2>
+      <canvas id="dishCanvas" width="600" height="500"></canvas>
+    </div>
+  </div>
+  <script defer>
+    let dishDiameter=0,dishDepth=0,focalLength=0;const canvas=document.getElementById('dishCanvas'),ctx=canvas.getContext('2d');ctx.fillStyle='#f8f9fa';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.font='14px Tahoma';ctx.fillStyle='#888';ctx.textAlign='center';ctx.fillText('پس از وارد کردن قطر و عمق دیش و کلیک روی دکمه محاسبه، شماتیک دیش نمایش داده می‌شود',canvas.width/2,canvas.height/2);document.getElementById('calculate').addEventListener('click',function(){const diameter=parseFloat(document.getElementById('diameter').value),depth=parseFloat(document.getElementById('depth').value);if(isNaN(diameter)||isNaN(depth)||diameter<=0||depth<=0){alert('لطفاً مقادیر عددی معتبر برای قطر و عمق دیش وارد کنید');return}dishDiameter=diameter;dishDepth=depth;focalLength=(diameter*diameter)/(16*depth);document.getElementById('focal-length').textContent=`${focalLength.toFixed(4)} سانتیمتر`;requestAnimationFrame(drawDishDiagram)});function drawDishDiagram(){ctx.clearRect(0,0,canvas.width,canvas.height);const cWidth=canvas.width,cHeight=canvas.height,maxDishWidth=cWidth*0.9,maxDishHeight=cHeight*0.8,widthScale=maxDishWidth/dishDiameter,heightScale=maxDishHeight/(focalLength+dishDepth),scale=Math.min(widthScale,heightScale)*0.9,dishWidth=dishDiameter*scale,dishFocalLength=focalLength*scale,dishDepthScaled=dishDepth*scale,centerX=cWidth/2,centerY=cHeight/2,vertexX=centerX,vertexY=centerY-dishFocalLength/2,parabolaPoints=calculateParabolaPoints(dishWidth,dishFocalLength);ctx.beginPath();const firstPoint=parabolaPoints[0];ctx.moveTo(vertexX-dishWidth/2+firstPoint.x,vertexY+firstPoint.y);for(let i=1;i<parabolaPoints.length;i++){const point=parabolaPoints[i];ctx.lineTo(vertexX-dishWidth/2+point.x,vertexY+point.y)}ctx.strokeStyle='#3366ff';ctx.lineWidth=2;ctx.stroke();const leftEdge={x:vertexX-dishWidth/2,y:vertexY+parabolaPoints[0].y},rightEdge={x:vertexX+dishWidth/2,y:vertexY+parabolaPoints[parabolaPoints.length-1].y};ctx.font='14px Tahoma';ctx.fillStyle='#ff0000';ctx.textAlign='center';ctx.fillText(`قطر (D): ${dishDiameter.toFixed(2)}سانتیمتر`,centerX,leftEdge.y+30);ctx.beginPath();ctx.moveTo(leftEdge.x-25,vertexY);ctx.lineTo(leftEdge.x-25,leftEdge.y);ctx.strokeStyle='#00aa00';ctx.lineWidth=1;ctx.stroke();ctx.save();ctx.translate(leftEdge.x-40,vertexY+(leftEdge.y-vertexY)/2);ctx.rotate(-Math.PI/2);ctx.font='14px Tahoma';ctx.fillStyle='#00aa00';ctx.fillText(`عمق (d): ${dishDepth.toFixed(2)}سانتیمتر`,0,0);ctx.restore();const focalX=centerX,focalY=vertexY+dishFocalLength;ctx.beginPath();ctx.arc(focalX,focalY,5,0,Math.PI*2);ctx.fillStyle='#ff9900';ctx.fill();ctx.beginPath();ctx.moveTo(focalX,focalY);ctx.lineTo(leftEdge.x,leftEdge.y);ctx.lineTo(rightEdge.x,rightEdge.y);ctx.lineTo(focalX,focalY);ctx.setLineDash([5,3]);ctx.strokeStyle='#ff9900';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);ctx.font='14px Tahoma';ctx.fillStyle='#ff9900';ctx.textAlign='center';ctx.fillText(`فاصله کانونی (f): ${focalLength.toFixed(2)}سانتیمتر`,centerX,focalY+25);ctx.font='12px Tahoma';ctx.fillStyle='#000000';ctx.textAlign='center';ctx.fillText('نقطه کانونی',focalX,focalY-15)}function calculateParabolaPoints(width,focalLength){const points=[],a=1/(4*focalLength),steps=10;for(let i=0;i<=steps;i++){const x=(width*i)/steps,y=a*(x-width/2)*(x-width/2);points.push({x,y})}return points}
+  </script>
+</body>
+</html>
